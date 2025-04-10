@@ -1,0 +1,70 @@
+{% extends 'forum/base.html' %}
+{% block title %}{{ question.title }} - Quora Clone{% endblock %}
+{% block content %}
+<a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary mb-3">← Back to Home</a>
+<h2>{{ question.title }}</h2>
+<p>{{ question.content }}</p>
+<p class="text-muted">Posted by {{ question.user.username }} on {{ question.created_at }}</p>
+<hr>
+
+<h4>Answers</h4>
+{% for answer in answers %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p>{{ answer.content }}</p>
+            <small class="text-muted">By {{ answer.user.username }} on {{ answer.created_at }}</small>
+            <div class="mt-2">
+                <button onclick="likeDislikeAnswer({{ answer.id }}, true)" class="btn btn-sm btn-outline-success">👍 Like</button>
+                <span id="like-count-{{ answer.id }}">{{ answer.like_count }}</span>
+                <button onclick="likeDislikeAnswer({{ answer.id }}, false)" class="btn btn-sm btn-outline-danger">👎 Dislike</button>
+                <span id="dislike-count-{{ answer.id }}">{{ answer.dislike_count }}</span>
+            </div>
+
+            <div class="mt-3">
+                {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'comment_on_answer' answer.id %}">
+                        {% csrf_token %}
+                        <textarea name="content" class="form-control mb-2" rows="2" placeholder="Add a comment..." required></textarea>
+                        <button class="btn btn-primary btn-sm">Comment</button>
+                    </form>
+                {% else %}
+                    <p><a href="{% url 'login' %}">Login</a> to comment.</p>
+                {% endif %}
+            </div>
+
+            <div class="mt-3">
+                <strong>Comments:</strong>
+                {% for comment in answer.comments_list %}
+                    <div class="mt-1"><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</div>
+                {% empty %}
+                    <p class="text-muted">No comments yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <p>No answers yet. Be the first to answer!</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+    <h4>Post an Answer:</h4>
+    <form method="POST">
+        {% csrf_token %}
+        {{ answer_form.as_p }}
+        <button class="btn btn-success">Post Answer</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to post an answer.</p>
+{% endif %}
+
+<script>
+    function likeDislikeAnswer(answerId, isLike) {
+        fetch(`/answer/${answerId}/like_dislike/?is_like=${isLike}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(`like-count-${answerId}`).textContent = data.likes;
+                document.getElementById(`dislike-count-${answerId}`).textContent = data.dislikes;
+            });
+    }
+</script>
+{% endblock %}

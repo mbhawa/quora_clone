@@ -1,0 +1,15 @@
+{% extends 'forum/base.html' %}
+{% block title %}My Questions - Quora Clone{% endblock %}
+{% block content %}
+<h2>My Questions</h2>
+<div class="list-group">
+    {% for question in questions %}
+        <a href="{% url 'view_question' question.id %}" class="list-group-item list-group-item-action">
+            <h5>{{ question.title }}</h5>
+            <p class="text-muted">{{ question.content|truncatechars:100 }}</p>
+        </a>
+    {% empty %}
+        <p>You haven't posted any questions yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'forum/base.html' %}
+{% block title %}Post a Question - Quora Clone{% endblock %}
+{% block content %}
+<h2>Post a New Question</h2>
+<form method="POST" class="mt-3">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
